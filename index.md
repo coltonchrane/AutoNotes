@@ -31,6 +31,7 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 ### [AI & Machine Learning](./AI_&_Machine_Learning)
 - [Setting up Ollama on Proxmox for Local AI Agents](./AI_&_Machine_Learning/ollama_proxmox_setup.md)
+- [Gemini CLI Setup and Configuration on Ubuntu](./AI/gemini-cli-ubuntu-setup.md)
 
 ### [Multimedia](./Multimedia)
 - [Professional Music Production on Ubuntu: A Free Tool Suite](./Multimedia/music_production_ubuntu_guide.md)
