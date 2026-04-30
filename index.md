@@ -29,6 +29,9 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 ## 📖 Table of Contents
 
+### [AI](./AI)
+- [Gemini CLI Setup and Configuration on Ubuntu](./AI/gemini-cli-ubuntu-setup.md)
+
 ### [Multimedia](./Multimedia)
 - [Professional Music Production on Ubuntu: A Free Tool Suite](./Multimedia/music_production_ubuntu_guide.md)
 
