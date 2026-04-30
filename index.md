@@ -29,7 +29,8 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 ## 📖 Table of Contents
 
-### [AI](./AI)
+### [AI & Machine Learning](./AI_&_Machine_Learning)
+- [Setting up Ollama on Proxmox for Local AI Agents](./AI_&_Machine_Learning/ollama_proxmox_setup.md)
 - [Gemini CLI Setup and Configuration on Ubuntu](./AI/gemini-cli-ubuntu-setup.md)
 
 ### [Multimedia](./Multimedia)
@@ -75,6 +76,8 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 - [VPN Setup Guide](./Networking/vpn_setup_guide.md)
 
 - [How to Download, Run, and Configure Tailscale](./Networking/tailscale_setup_guide.md)
+
+- [VNC Viewer: A Comprehensive Guide](./Networking/vnc_viewer_guide.md)
 
 ### [GitHub](./GitHub)
 - [Setting Up GitHub Pages for Markdown Repositories](./GitHub/github_pages_markdown_setup.md)
