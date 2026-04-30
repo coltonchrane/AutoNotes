@@ -73,6 +73,8 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 - [How to Download, Run, and Configure Tailscale](./Networking/tailscale_setup_guide.md)
 
+- [VNC Viewer: A Comprehensive Guide](./Networking/vnc_viewer_guide.md)
+
 ### [GitHub](./GitHub)
 - [Setting Up GitHub Pages for Markdown Repositories](./GitHub/github_pages_markdown_setup.md)
 
