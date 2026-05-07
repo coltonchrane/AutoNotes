@@ -56,9 +56,10 @@ async function runChat() {
 
 ## 4. Prompting Best Practices
 
-Qwen1.5 uses a specific ChatML-style format to distinguish between different roles. When using the Transformers.js chat template API, this is handled automatically. However, for manual prompting, follow this structure:
+Qwen1.5 uses a specific ChatML-style format to distinguish between different roles. When using the Transformers.js chat template API, this is handled automatically.
 
 ### H3. ChatML Structure
+For manual prompting or raw template construction, follow this structure:
 ```text
 <|im_start|>system
 You are a helpful assistant.<|im_end|>
@@ -72,7 +73,45 @@ Your question here.<|im_end|>
 - **Top-p (Nucleus Sampling):** Use `0.9` to ensure the model stays focused on high-probability tokens.
 - **Repeat Penalty:** Use `1.1` to prevent the model from looping text in small models like the 0.5B variant.
 
-## 5. Performance Optimization
+## 5. Loading Contextual Knowledge
+
+To provide the model with external data (In-Context Learning), you should inject knowledge into the message history or system prompt. This is the most effective way to "load" knowledge without fine-tuning.
+
+### H3. System Message Injection
+Best for global rules, personas, or static datasets. This defines the "ground truth" for the session.
+
+```javascript
+const messages = [
+    {
+        role: 'system',
+        content: `You are an expert on AutoNotes. Use this knowledge: 
+        - AutoNotes uses Gemini AI for note generation.
+        - It is hosted on GitHub Pages.
+        - Contributions are made via GitHub Issues.`
+    },
+    { role: 'user', content: 'How does AutoNotes create notes?' }
+];
+```
+
+### H3. Context Augmentation (RAG-lite)
+Best for dynamic data. Format the data clearly using delimiters like `---` or `Context:` labels so the model can distinguish between the query and the knowledge base.
+
+**Recommended Format:**
+```text
+Answer the user question using the context provided below.
+
+Context:
+-----------
+[Your external data/document snippet here]
+-----------
+
+Question: [User query]
+```
+
+### H3. Few-Shot Prompting
+If you need the model to output a specific format (like JSON or specific terminology), provide 2-3 examples in the conversation history before the actual user prompt.
+
+## 6. Performance Optimization
 
 Running LLMs in a browser can be memory-intensive. Use the following techniques to improve user experience:
 
@@ -87,7 +126,7 @@ const generator = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat', 
 ### H3. Model Quantization
 Transformers.js uses quantized models by default (usually Q8, Q4, or ONNX fp16). The `Xenova` repository provides these pre-converted versions to reduce download size (approx. 300MB - 500MB for the 0.5B model).
 
-## 6. Handling UI Integration
+## 7. Handling UI Integration
 
 Since model loading takes time, always implement a loading state in your UI:
 
