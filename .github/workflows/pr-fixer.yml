@@ -52,7 +52,6 @@ jobs:
             echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
             echo "$REVIEW_BODY" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
-            # Reactions on reviews are different, we'll skip reaction for now or target the review
             echo "REACTION_PATH=/repos/$REPOSITORY/pulls/$PR_NUMBER_INPUT/reviews/$REVIEW_ID/reactions" >> $GITHUB_ENV
           fi
 
@@ -68,26 +67,16 @@ jobs:
         run: |
           gh pr checkout "$PR_NUMBER_ENV"
 
-      - name: Get PR Info
-        id: pr_info
+      - name: Get PR Context
+        id: pr_context
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_FILE_ENV: ${{ env.TARGET_FILE }}
           PR_NUMBER_ENV: ${{ env.PR_NUMBER }}
         run: |
-          echo "Target File before check: $TARGET_FILE_ENV"
-          if [ -z "$TARGET_FILE_ENV" ]; then
-            # If no target file (issue comment or review summary), find the first .md file that was changed in this PR
-            PR_DATA=$(gh pr view $PR_NUMBER_ENV --json files)
-            MD_FILE=$(echo "$PR_DATA" | jq -r '.files[] | select(.path | endswith(".md")) | .path' | head -n 1)
-            
-            if [ -z "$MD_FILE" ] || [ "$MD_FILE" == "null" ]; then
-              echo "No markdown file found in this PR."
-              exit 0 # Exit gracefully if no MD file to update
-            fi
-            SANITIZED_MD_FILE=$(printf '%s' "$MD_FILE" | tr -d '\n\r')
-            echo "TARGET_FILE=$SANITIZED_MD_FILE" >> "$GITHUB_ENV"
-          fi
+          # Get the full diff of the PR
+          gh pr diff $PR_NUMBER_ENV > pr_diff.txt
+          # Get the list of changed files
+          gh pr view $PR_NUMBER_ENV --json files --jq '.files[].path' > changed_files.txt
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -98,14 +87,14 @@ jobs:
         run: |
           pip install google-genai
 
-      - name: Update Note with Gemini
-        id: update_note
-        if: env.COMMENT_BODY != '' && env.TARGET_FILE != ''
+      - name: Fix PR with Gemini
+        id: fix_pr
+        if: env.COMMENT_BODY != ''
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-3-flash-preview
-          FILE_PATH: ${{ env.TARGET_FILE }}
           COMMENT_BODY: ${{ env.COMMENT_BODY }}
+          TARGET_FILE: ${{ env.TARGET_FILE }}
         run: |
           chmod +x scripts/gemini_pr_fixer.py
           python scripts/gemini_pr_fixer.py
@@ -119,7 +108,7 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "docs: (Gemini Refinement) update based on PR comment"
+          git commit -m "chore: (Gemini Fix) apply changes based on PR feedback"
           git push
 
       - name: React to Comment

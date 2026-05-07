@@ -5,49 +5,23 @@ import json
 import re
 from google import genai
 
-def extract_title(content):
-    # Extract title from front matter or H1
-    front_matter_match = re.search(r"^title:\s*(.*?)$", content, re.MULTILINE)
-    if front_matter_match:
-        return front_matter_match.group(1).strip()
-    
-    h1_match = re.search(r"^#\s*(.*?)$", content, re.MULTILINE)
-    if h1_match:
-        return h1_match.group(1).strip()
-    
-    return None
-
-def update_index_entry(old_title, new_title, file_path):
-    # Update only the root index.md. Category index.md files no longer contain note links.
-    category_dir = os.path.dirname(file_path)
-    filename = os.path.basename(file_path)
-    
-    # Category dir is already slugified on disk
-    encoded_category = category_dir
-    encoded_filename = filename.replace(" ", "%20")
-
-    targets = [
-        ("index.md", f"./{encoded_category}/{encoded_filename}"), # Root index
-    ]
-
-    for target_path, link_path in targets:
-        if not os.path.exists(target_path):
+def apply_changes(changes):
+    """
+    Applies changes to files.
+    'changes' should be a list of dicts: {"path": "...", "content": "..."}
+    """
+    for change in changes:
+        path = change.get("path")
+        content = change.get("content")
+        if not path or content is None:
             continue
-
-        with open(target_path, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        # Regex to find the entry: - [ANYTHING](link_path)
-        pattern = rf"- \[.*?\]\({re.escape(link_path)}\)"
-        replacement = f"- [{new_title}]({link_path})"
         
-        if re.search(pattern, content):
-            new_content = re.sub(pattern, replacement, content)
-            with open(target_path, "w", encoding="utf-8") as f:
-                f.write(new_content)
-            print(f"Updated link title in {target_path} from '{old_title}' to '{new_title}'")
-        else:
-            print(f"No existing link found for {link_path} in {target_path}")
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"Updated {path}")
 
 def main():
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -55,63 +29,72 @@ def main():
         print("Error: GEMINI_API_KEY environment variable not set.")
         sys.exit(1)
 
-    file_path = os.environ.get("FILE_PATH")
     comment_body = os.environ.get("COMMENT_BODY")
+    target_file = os.environ.get("TARGET_FILE") # Might be null if it's a general PR comment
 
-    if not file_path or not comment_body:
-        print("Error: FILE_PATH or COMMENT_BODY environment variables not set.")
+    if not comment_body:
+        print("Error: COMMENT_BODY environment variable not set.")
         sys.exit(1)
 
-    if not os.path.exists(file_path):
-        print(f"Error: File {file_path} not found.")
-        sys.exit(1)
+    # Read PR context
+    pr_diff = ""
+    if os.path.exists("pr_diff.txt"):
+        with open("pr_diff.txt", "r", encoding="utf-8") as f:
+            pr_diff = f.read()
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        current_content = f.read()
+    changed_files = []
+    if os.path.exists("changed_files.txt"):
+        with open("changed_files.txt", "r", encoding="utf-8") as f:
+            changed_files = [line.strip() for line in f.readlines() if line.strip()]
 
-    old_title = extract_title(current_content)
-    
+    # If target_file is provided (from a review comment), prioritize it
+    context_files_info = ""
+    for file_path in changed_files:
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                context_files_info += f"\n--- File: {file_path} ---\n{content}\n"
+
     model_name = os.environ.get("GEMINI_MODEL", "gemini-3-flash-preview")
     client = genai.Client(api_key=api_key)
 
-    is_index = file_path == "index.md"
-    
-    if is_index:
-        prompt = f"""
-You are a technical documentation assistant. I need to update the repository's index file based on feedback.
+    prompt = f"""
+You are an expert software engineer assistant. Your task is to address feedback on a Pull Request.
 
-Current Index Content:
----
-{current_content}
----
-
-User Feedback:
+### Context:
+**User Feedback/Comment:**
 "{comment_body}"
 
-Please update the index file.
-- PRESERVE the existing Jekyll front matter.
-- Preserve the overall structure (Table of Contents, Features, etc.).
-- Ensure links to notes remain valid.
-- Return ONLY the updated markdown content. No conversational filler or code blocks.
-"""
-    else:
-        prompt = f"""
-You are a technical documentation assistant. I have a technical note that needs refinement based on a user's feedback.
+{"**Specific File Targeted by Comment:** " + target_file if target_file else ""}
 
-Current Content:
----
-{current_content}
----
+**PR Diff:**
+```diff
+{pr_diff}
+```
 
-User Feedback:
-"{comment_body}"
+**Relevant File Contents:**
+{context_files_info}
 
-Please update the technical note based on the feedback.
-- PRESERVE the existing Jekyll front matter (the block between --- at the very top).
-- Preserve the existing H1 title and the "Source/Contributor" section at the bottom unless the feedback explicitly asks to change them.
-- Ensure main sections remain numbered (## 1., ## 2., etc.) as per the repository style.
-- Improve the formatting, clarity, or depth of the content as requested.
-- Return ONLY the raw markdown content. No conversational filler or markdown code blocks.
+### Instructions:
+1. Analyze the feedback and the current state of the code.
+2. Determine which files need to be modified to address the feedback.
+3. Provide the full updated content for each file that needs changes.
+4. If the feedback is documentation-related, maintain the Jekyll front matter and formatting standards of the repo.
+5. If the feedback is code-related, ensure the fix is idiomatic and correct.
+6. Return your response ONLY as a JSON object with a list of changes.
+
+### Output Format:
+{{
+  "changes": [
+    {{
+      "path": "path/to/file.ext",
+      "content": "Full updated content of the file..."
+    }},
+    ...
+  ]
+}}
+
+Do NOT include any conversational filler or markdown code blocks (like ```json). Just the raw JSON.
 """
 
     try:
@@ -119,31 +102,28 @@ Please update the technical note based on the feedback.
             model=model_name,
             contents=prompt
         )
-        updated_content = response.text.strip()
+        text = response.text.strip()
         
         # Clean up any potential markdown code block markers
-        if updated_content.startswith("```markdown"):
-            updated_content = updated_content[11:]
-        elif updated_content.startswith("```"):
-            updated_content = updated_content[3:]
-        if updated_content.endswith("```"):
-            updated_content = updated_content[:-3]
+        if text.startswith("```json"):
+            text = text[7:]
+        if text.startswith("```"):
+            text = text[3:]
+        if text.endswith("```"):
+            text = text[:-3]
         
-        updated_content = updated_content.strip()
+        data = json.loads(text.strip())
+        changes = data.get("changes", [])
+        
+        if not changes:
+            print("No changes proposed by Gemini.")
+            return
 
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(updated_content)
-            
-        print(f"Successfully updated {file_path}")
-        
-        # If it was a note, check if the title changed and update index.md
-        if not is_index:
-            new_title = extract_title(updated_content)
-            if new_title and new_title != old_title:
-                update_index_entry(old_title, new_title, file_path)
+        apply_changes(changes)
         
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
+        print(f"Error calling Gemini API or applying changes: {e}")
+        print(f"Response text was: {text if 'text' in locals() else 'N/A'}")
         sys.exit(1)
 
 if __name__ == "__main__":
