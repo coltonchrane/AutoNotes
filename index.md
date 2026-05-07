@@ -83,6 +83,7 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 - [VNC Viewer: A Comprehensive Guide](./Networking/vnc_viewer_guide.md)
 
 ### [GitHub](./GitHub)
+- [Deploying to Google Cloud Platform using GitHub Actions](./GitHub/google_cloud_github_actions_deployment.md)
 - [Setting Up GitHub Pages for Markdown Repositories](./GitHub/github_pages_markdown_setup.md)
 
 - [Configuring a Custom Domain for GitHub Pages](./GitHub/github_pages_custom_domain.md)
