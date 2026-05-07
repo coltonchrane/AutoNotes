@@ -16,8 +16,10 @@ def apply_changes(changes):
         if not path or content is None:
             continue
         
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        # Ensure directory exists (if not in root)
+        dir_name = os.path.dirname(path)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
         
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
@@ -51,9 +53,12 @@ def main():
     context_files_info = ""
     for file_path in changed_files:
         if os.path.exists(file_path):
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read()
-                context_files_info += f"\n--- File: {file_path} ---\n{content}\n"
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    context_files_info += f"\n--- File: {file_path} ---\n{content}\n"
+            except Exception as e:
+                print(f"Warning: Could not read file {file_path}: {e}")
 
     model_name = os.environ.get("GEMINI_MODEL", "gemini-3-flash-preview")
     client = genai.Client(api_key=api_key)
@@ -93,26 +98,23 @@ You are an expert software engineer assistant. Your task is to address feedback 
     ...
   ]
 }}
-
-Do NOT include any conversational filler or markdown code blocks (like ```json). Just the raw JSON.
 """
 
     try:
         response = client.models.generate_content(
             model=model_name,
-            contents=prompt
+            contents=prompt,
+            config={
+                "response_mime_type": "application/json",
+            }
         )
+        
+        if not response.text:
+            print("Error: Gemini returned an empty response.")
+            sys.exit(1)
+
         text = response.text.strip()
-        
-        # Clean up any potential markdown code block markers
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.startswith("```"):
-            text = text[3:]
-        if text.endswith("```"):
-            text = text[:-3]
-        
-        data = json.loads(text.strip())
+        data = json.loads(text)
         changes = data.get("changes", [])
         
         if not changes:
@@ -121,9 +123,12 @@ Do NOT include any conversational filler or markdown code blocks (like ```json).
 
         apply_changes(changes)
         
+    except json.JSONDecodeError as je:
+        print(f"Error: Failed to parse JSON response from Gemini: {je}")
+        print(f"Raw response text: {text if 'text' in locals() else 'N/A'}")
+        sys.exit(1)
     except Exception as e:
         print(f"Error calling Gemini API or applying changes: {e}")
-        print(f"Response text was: {text if 'text' in locals() else 'N/A'}")
         sys.exit(1)
 
 if __name__ == "__main__":
