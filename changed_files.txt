@@ -1,0 +1,3 @@
+Cloud/google_cloud_github_actions_deployment.md
+Cloud/index.md
+index.md
