@@ -1,0 +1,98 @@
+---
+layout: default
+title: Running Qwen1.5-0.5B-Chat in the Browser
+parent: Machine Learning
+nav_order: 1
+---
+
+# Running Qwen1.5-0.5B-Chat in the Browser
+
+This guide explains how to implement and optimize the Qwen1.5-0.5B-Chat model for client-side browser applications using Transformers.js.
+
+## 1. Overview of Transformers.js
+
+Transformers.js allows you to run state-of-the-art machine learning models directly in your browser without the need for a backend server. The `Xenova/Qwen1.5-0.5B-Chat` model is a quantized version of Alibaba's Qwen model, specifically optimized for performance in resource-constrained environments like web browsers.
+
+## 2. Installation and Setup
+
+To get started, you need to install the `@xenova/transformers` library via NPM or include it via a CDN for vanilla HTML/JS projects.
+
+### Using NPM
+```bash
+npm install @xenova/transformers
+```
+
+### Using CDN (ES Modules)
+```javascript
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers';
+```
+
+## 3. Basic Implementation
+
+The simplest way to run the model is by using the `pipeline` function. This handles model loading, tokenization, and inference.
+
+```javascript
+import { pipeline } from '@xenova/transformers';
+
+async function runChat() {
+    // Initialize the text-generation pipeline
+    const generator = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat');
+
+    const messages = [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: 'How do I run AI in a browser?' },
+    ];
+
+    // Generate a response
+    const output = await generator(messages, {
+        max_new_tokens: 128,
+        temperature: 0.7,
+        do_sample: true,
+    });
+
+    console.log(output[0].generated_text.at(-1).content);
+}
+```
+
+## 4. Prompting Best Practices
+
+Qwen1.5 uses a specific ChatML-style format to distinguish between different roles. When using the Transformers.js chat template API, this is handled automatically. However, for manual prompting, follow this structure:
+
+### H3. ChatML Structure
+```text
+<|im_start|>system
+You are a helpful assistant.<|im_end|>
+<|im_start|>user
+Your question here.<|im_end|>
+<|im_start|>assistant
+```
+
+### H3. Parameter Tuning
+- **Temperature:** Set between `0.6` and `0.8` for a balance between creativity and coherence.
+- **Top-p (Nucleus Sampling):** Use `0.9` to ensure the model stays focused on high-probability tokens.
+- **Repeat Penalty:** Use `1.1` to prevent the model from looping text in small models like the 0.5B variant.
+
+## 5. Performance Optimization
+
+Running LLMs in a browser can be memory-intensive. Use the following techniques to improve user experience:
+
+### H3. WebGPU Acceleration
+If the browser supports it, WebGPU offers a significant speedup over WASM.
+```javascript
+const generator = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat', {
+    device: 'webgpu',
+});
+```
+
+### H3. Model Quantization
+Transformers.js uses quantized models by default (usually Q8, Q4, or ONNX fp16). The `Xenova` repository provides these pre-converted versions to reduce download size (approx. 300MB - 500MB for the 0.5B model).
+
+## 6. Handling UI Integration
+
+Since model loading takes time, always implement a loading state in your UI:
+
+1. **Progress Tracking:** Use the `progress_callback` in the pipeline initialization to show a loading bar.
+2. **Web Workers:** Run the inference in a Web Worker to prevent the main UI thread from freezing during generation.
+
+---
+**Source:** [GitHub Issue #71](https://github.com/coltonchrane/AutoNotes/issues/71) | **Contributor:** @coltonchrane

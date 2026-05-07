@@ -29,6 +29,9 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 ## 📖 Table of Contents
 
+### [Machine Learning](./Machine_Learning)
+- [Running Qwen1.5-0.5B-Chat in the Browser](./Machine_Learning/running-qwen-transformers-js.md)
+
 ### [Cloud Computing](./Cloud_Computing)
 - [Hosting Websites on Google Ecosystem](./Cloud_Computing/hosting_websites_on_google.md)
 
