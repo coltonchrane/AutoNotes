@@ -29,6 +29,9 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 ## 📖 Table of Contents
 
+### [Cloud](./Cloud)
+- [Deploying to Google Cloud Platform using GitHub Actions](./Cloud/google_cloud_github_actions_deployment.md)
+
 ### [Cloud Computing](./Cloud_Computing)
 - [Hosting Websites on Google Ecosystem](./Cloud_Computing/hosting_websites_on_google.md)
 
