@@ -6,8 +6,8 @@ on:
 jobs:
   create-note:
     if: |
-      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'contribution') ||
-      (github.event_name == 'issues' && github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'contribution'))
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'contribution' && github.event.issue.pull_request == null) ||
+      (github.event_name == 'issues' && github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'contribution') && github.event.issue.pull_request == null)
     runs-on: ubuntu-latest
     permissions:
       contents: write
