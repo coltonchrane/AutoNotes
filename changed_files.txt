@@ -1,3 +1,6 @@
 Cloud/google_cloud_github_actions_deployment.md
 Cloud/index.md
+GitHub/google_cloud_github_actions_deployment.md
+changed_files.txt
 index.md
+pr_diff.txt
