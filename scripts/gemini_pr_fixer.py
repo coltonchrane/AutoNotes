@@ -5,10 +5,11 @@ import json
 import re
 from google import genai
 
-def apply_changes(changes):
+def apply_changes(changes, allowed_files):
     """
     Applies changes to files.
     'changes' should be a list of dicts: {"path": "...", "content": "..."}
+    'allowed_files' is a set of files already in the PR context.
     """
     for change in changes:
         path = change.get("path")
@@ -16,6 +17,12 @@ def apply_changes(changes):
         if not path or content is None:
             continue
         
+        # Security/Sanity check: Is the AI trying to create a random file?
+        if path not in allowed_files:
+            # Check if it's a new file specifically requested or just a hallucination
+            print(f"Warning: Gemini is attempting to create/modify a file not in the current PR context: {path}")
+            # For now, we allow it but log it. In stricter modes, we could block it.
+
         # Ensure directory exists (if not in root)
         dir_name = os.path.dirname(path)
         if dir_name:
@@ -51,6 +58,8 @@ def main():
 
     # If target_file is provided (from a review comment), prioritize it
     context_files_info = ""
+    allowed_files = set(changed_files)
+    
     for file_path in changed_files:
         if os.path.exists(file_path):
             try:
@@ -80,22 +89,26 @@ You are an expert software engineer assistant. Your task is to address feedback 
 **Relevant File Contents:**
 {context_files_info}
 
-### Instructions:
-1. Analyze the feedback and the current state of the code.
-2. Determine which files need to be modified to address the feedback.
-3. Provide the full updated content for each file that needs changes.
-4. If the feedback is documentation-related, maintain the Jekyll front matter and formatting standards of the repo.
-5. If the feedback is code-related, ensure the fix is idiomatic and correct.
-6. Return your response ONLY as a JSON object with a list of changes.
+### CRITICAL INSTRUCTIONS:
+1. **NO APPENDING:** Do NOT just add new code to the end of the file. You must REWRITE the entire file content so that it is a complete, working version of the file with the requested changes integrated.
+2. **NO DUPLICATES:** Ensure you are not leaving old versions of functions or logic in the file. Replace old code with the new logic.
+3. **ONLY RELEVANT FILES:** Only modify files that are actually relevant to the feedback. 
+4. **NO UNNECESSARY FILES:** Do NOT create new `.txt` files or documentation unless explicitly asked. Focus on fixing the existing code/docs in the PR.
+5. **FRONT MATTER:** If modifying markdown, you MUST preserve the existing Jekyll front matter (the block between --- at the top).
+
+### Process:
+1. Analyze the feedback.
+2. Identify the specific lines/blocks in the provided "Relevant File Contents" that need to change.
+3. Construct the FULL content for each modified file.
+4. Return the result as a JSON object.
 
 ### Output Format:
 {{
   "changes": [
     {{
       "path": "path/to/file.ext",
-      "content": "Full updated content of the file..."
-    }},
-    ...
+      "content": "THE FULL UPDATED CONTENT OF THE FILE. DO NOT USE PLACEHOLDERS OR APPEND."
+    }}
   ]
 }}
 """
@@ -121,7 +134,7 @@ You are an expert software engineer assistant. Your task is to address feedback 
             print("No changes proposed by Gemini.")
             return
 
-        apply_changes(changes)
+        apply_changes(changes, allowed_files)
         
     except json.JSONDecodeError as je:
         print(f"Error: Failed to parse JSON response from Gemini: {je}")
