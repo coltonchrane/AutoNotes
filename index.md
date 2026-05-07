@@ -29,6 +29,9 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 ## 📖 Table of Contents
 
+### [Cloud Computing](./Cloud_Computing)
+- [Hosting Websites on Google Ecosystem](./Cloud_Computing/hosting_websites_on_google.md)
+
 ### [AI & Machine Learning](./AI_&_Machine_Learning)
 - [Setting up Ollama on Proxmox for Local AI Agents](./AI_&_Machine_Learning/ollama_proxmox_setup.md)
 - [Gemini CLI Setup and Configuration on Ubuntu](./AI/gemini-cli-ubuntu-setup.md)
