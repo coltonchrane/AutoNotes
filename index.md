@@ -60,7 +60,7 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 ### [Programming Languages](./Programming_Languages)
 - [How C# Works](./Programming_Languages/how_csharp_works.md)
-- [Algorithmic Trading Bot Architecture with .NET 10](./Programming_Languages//dotnet-10-algorithmic-trading-bot-architecture.md)
+- [Algorithmic Trading Bot Architecture with .NET 10](./Programming_Languages/dotnet-10-algorithmic-trading-bot-architecture.md)
 
 ### [Disk Management](./Disk_Management)
 - [Compress Image CLI](./Disk_Management/compress_image_cli.md)
