@@ -29,6 +29,9 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 ## 📖 Table of Contents
 
+### [Machine Learning](./Machine_Learning)
+- [Running Qwen1.5-0.5B-Chat in the Browser](./Machine_Learning/running-qwen-transformers-js.md)
+
 ### [Cloud Computing](./Cloud_Computing)
 - [Hosting Websites on Google Ecosystem](./Cloud_Computing/hosting_websites_on_google.md)
 
@@ -83,6 +86,7 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 - [VNC Viewer: A Comprehensive Guide](./Networking/vnc_viewer_guide.md)
 
 ### [GitHub](./GitHub)
+- [Deploying to Google Cloud Platform using GitHub Actions](./GitHub/google_cloud_github_actions_deployment.md)
 - [Setting Up GitHub Pages for Markdown Repositories](./GitHub/github_pages_markdown_setup.md)
 
 - [Configuring a Custom Domain for GitHub Pages](./GitHub/github_pages_custom_domain.md)
