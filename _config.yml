@@ -2,7 +2,7 @@
 title: AutoNotes
 description: A generative knowledge base powered by Gemini AI.
 url: "https://coltonchrane.dev"
-baseurl: "/autonotes"
+baseurl: ""
 favicon_ico: "/favicon.ico"
 
 # Theme settings

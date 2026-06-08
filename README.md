@@ -1,4 +1,4 @@
-# [AutoNotes](https://coltonchrane.github.io/AutoNotes/)
+# [AutoNotes](https://coltonchrane.dev/)
 ### Generative Knowledge Engine: Supercharge AI responses by grounding Gemini in your local data for high-precision, context-aware queries.
 
 ## 🚀 Features
