@@ -12,11 +12,13 @@ color_scheme: dark
 # Build settings
 plugins:
   - jekyll-remote-theme
-  - just-the-docs
   - jekyll-include-cache
   - jekyll-relative-links
   - jemoji
   - jekyll-seo-tag
+  - jekyll-default-layout
+  - jekyll-feed
+  - jekyll-sitemap
 
 # Just the Docs settings
 # This ensures the search works correctly on GitHub Pages
