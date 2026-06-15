@@ -12,11 +12,14 @@ color_scheme: dark
 # Build settings
 plugins:
   - jekyll-remote-theme
+  - just-the-docs
+  - jekyll-include-cache
   - jekyll-relative-links
   - jemoji
+  - jekyll-seo-tag
 
 # Just the Docs settings
 # This ensures the search works correctly on GitHub Pages
 aux_links:
-  "AutoNotes on GitHub":
-    - "https://github.com/coltonchrane/AutoNotes"
+  "AutoNotes on GitHub": "https://github.com/coltonchrane/AutoNotes"
+aux_links_new_tab: true
