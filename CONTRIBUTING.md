@@ -7,7 +7,7 @@ We welcome new notes! This repository uses a **Gemini AI-powered bot** to help t
 There are two ways to contribute technical notes:
 
 ### Method 1: Use the Contribution Form (Recommended)
-The easiest way is to use our **[Contribution Form](https://coltonchrane.dev/contribute.md)** directly on the website.
+The easiest way is to use our **[Contribution Form](https://coltonchrane.dev/AutoNotes/contribute.md)** directly on the website.
 1. Fill out the **Category**, **Title**, and **Content**.
 2. Click **Generate Note with AI 🤖**.
 3. You will be redirected to a pre-filled GitHub Issue. **Click "Submit new issue"** to trigger the automation.
