@@ -52,6 +52,8 @@ This repository uses a **Gemini AI-powered bot** to streamline contributions.
 
 - [Fixing wkhtmltopdf Installation on Linux](./Linux/wkhtmltopdf_installation_fix.md)
 
+- [Creating and Flashing a Custom Ubuntu Image](./Linux/custom-ubuntu-image-flashing.md)
+
 ### [Recipes](./Recipes)
 - [How to Make Chicken Fried Steak with Sides](./Recipes/chicken_fried_steak_with_sides.md)
 - [Professional-Grade Fajitas with Citrus-Aromatics Marinade](./Recipes/fajita_marinade_and_preparation_guide.md)
