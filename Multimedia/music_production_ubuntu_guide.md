@@ -11,31 +11,38 @@ This guide provides a comprehensive roadmap for setting up a professional-grade 
 
 ## 1. System Preparation and Audio Backend
 
-Before installing production software, you must ensure your Ubuntu system is optimized for low-latency audio. In modern Ubuntu releases, **PipeWire** is the standard, but for professional audio, we often utilize the **Ubuntu Studio Installer** to configure real-time permissions.
+Before installing production software, you must ensure your Ubuntu system is optimized for low-latency audio. In modern Ubuntu releases (such as Ubuntu 25.10), **PipeWire** is the standard audio server, and the **Ubuntu Studio** packages configure PipeWire-JACK integration and real-time permissions directly from the official repositories.
 
 ### Optimization Steps
-Install the Ubuntu Studio toolkit to optimize your kernel and system settings:
+Install the Ubuntu Studio PipeWire configuration, installer toolkit, and patchbay to optimize your system settings:
 ```bash
-sudo add-apt-repository ppa:ubuntustudio-dev/pautone
 sudo apt update
-sudo apt install ubuntustudio-controls
+sudo apt install -y ubuntustudio-installer ubuntustudio-pipewire-config pipewire-jack qpwgraph
 ```
-Open **Ubuntu Studio Controls** and ensure "Enable Realtime Permissions" is checked. This prevents audio "crackling" (xruns) during heavy processing.
+Add your user to the `audio` and `pipewire` groups to enable real-time permissions (prevents audio "crackling" or *xruns* during heavy processing), then log out and back in:
+```bash
+sudo usermod -aG audio,pipewire "$USER"
+```
 
 ## 2. Core Software Stack: The DAW and Beyond
 
 ### Digital Audio Workstation (DAW): Ardour
 Ardour is a world-class DAW for recording, editing, and mixing. It is the heart of your studio.
 ```bash
-sudo apt install ardour
+sudo apt install -y ardour
 ```
 
 ### Essential Free Plugins
-To expand your sound palette, install these industry-standard open-source instruments:
-- **Surge XT:** A powerful subtractive/hybrid synthesizer.
+To expand your sound palette, install these industry-standard open-source instruments and plugin suites:
+- **Surge XT:** A powerful subtractive/hybrid synthesizer (available as a `.deb` from the [Surge XT GitHub Releases](https://github.com/surge-synthesizer/surge/releases)).
 - **Vital (Free Tier):** A high-quality spectral warping wavetable synth.
 - **Hydrogen:** A dedicated advanced drum machine.
 - **Yoshimi:** A complex additive/subtractive synthesizer.
+- **Calf & MDA Plugins:** Classic LV2 instruments (including `mda Piano`) and studio effects.
+
+```bash
+sudo apt install -y hydrogen yoshimi calf-plugins mda-lv2
+```
 
 ## 3. Digital MIDI and Virtual Instruments
 
